@@ -8,7 +8,7 @@ navbar:
     - text: "Code"
       href: Code_Appendix.html
     - text: "Report"
-      href: main.html
+      href: index.html
       
 output:
   html_document:
