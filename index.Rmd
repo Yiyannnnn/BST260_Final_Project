@@ -1,9 +1,9 @@
 ---
 title: "Machine Learning Application on Human Gut Microbiome Data"
 author: "Yiyan Zhang"
-output:
-  html_document: default
+output: html_document
 ---
+
 
 ### Introduction
 
