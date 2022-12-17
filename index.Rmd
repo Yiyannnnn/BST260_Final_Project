@@ -30,18 +30,23 @@ Overall, it is important to consider multiple evaluation metrics and choose the 
 
 ### Conclusion
 
+
 In conclusion, the machine learning models applied in this study were able to effectively classify samples from healthy individuals and those with various diseases using data from the human gut microbiome. PCA was first used to get a sense of whether disease samples could be easily differentiated from healthy samples based on microbiome composition. The Logit-Lasso and RF classification methods were then applied, with k-fold cross-validation used to select the best model and estimate performance. The Logit-Lasso model performed adequately good overall, with high accuracy, F1 score, and AUPRC in all disease groups. The Random Forest model showed stronger performance and may be more suitable for cases where interpretability of the model is important. 
 
-These results highlight the potential of machine learning techniques in analyzing and understanding the complex relationships between the gut microbiome and human health. However, this study did not cooperate much microbiome data specific features in our analysis, like sparsity, compositionality, and small n large p problem. Further studies with larger and more diverse datasets may be necessary to fully explore the potential of these methods in the field of gut microbiome research. There is also more machine learning framework are available. Also, out study are limited at two-class classification. More pivotal studies that worked on multi-class classification give me further directions on the project (Su et al., 2022).
+These results highlight the potential of machine learning techniques in analyzing and understanding the complex relationships between the gut microbiome and human health. However, this study did not cooperate much microbiome data specific features in our analysis, like sparsity, compositionality, and small n large p problem. Further studies with larger and more diverse datasets may be necessary to fully explore the potential of these methods in the field of gut microbiome research. There is also more strong machine learning framework are available, like extreme gradient boosting decision trees (XGBoost), the elastic net (ENET) and supporting vector machines (SVM). Also, out study are limited at two-class classification. More pivotal studies that worked on multi-class classification give me further directions on the project (Su et al., 2022).A study published in the journal Microbiome in 2017 used microbiome data from the Human Microbiome Project to classify individuals into one of three categories: healthy, obese, or type 2 diabetes with Random Forest (Wu et al., 2017). Another study published in the journal Nature Communications in 2018 used microbiome data from the American Gut Project to classify individuals into one of four categories: healthy, inflammatory bowel disease (IBD), non-IBD gastrointestinal disease, or non-gastrointestinal disease with SVM (Ma et al.,2018). 
 
 ### Reference
 
 Huseyin, C. E., O’Toole, P. W., Cotter, P. D., & Scanlan, P. D. (2017). Forgotten fungi—The gut mycobiome in human health and disease. FEMS Microbiology Reviews, 41(4), 479–511. https://doi.org/10.1093/femsre/fuw047
+
+Ma, J., Knight, R., Fierer, N., & Gilbert, J. A. (2018). Classifying inflammatory bowel disease and non-inflammatory bowel disease using machine learning techniques applied to American Gut Project data. Nature Communications, 9(1), 3236.
 
 Pasolli, E., Schiffer, L., Manghi, P., Renson, A., Obenchain, V., Truong, D. T., Beghini, F., Malik, F., Ramos, M., Dowd, J. B., Huttenhower, C., Morgan, M., Segata, N., & Waldron, L. (2017). Accessible, curated metagenomic data through ExperimentHub. Nature Methods, 14(11), Article 11. https://doi.org/10.1038/nmeth.4468
 
 Thursby, E., & Juge, N. (2017). Introduction to the human gut microbiota. Biochemical Journal, 474(11), 1823–1836. https://doi.org/10.1042/BCJ20160510
 
 Wang, X., & Liu, Y. (2020). Comparative study of classifiers for human microbiome data. Medicine in Microecology, 4, 100013. https://doi.org/10.1016/j.medmic.2020.100013
+
+Wu, H. D., Compher, C., Chen, E. Z., Smith, S., Shah, R. D., Bessesen, D. H., … Knights, D. (2017). Comparative analysis of fecal microbiome in individuals with type 2 diabetes and matched controls using two different 16S rRNA gene sequencing approaches. Microbiome, 5(1), 54.
 
 Su, Q., Liu, Q., Lau, R. I., Zhang, J., Xu, Z., Yeoh, Y. K., Leung, T. W. H., Tang, W., Zhang, L., Liang, J. Q. Y., Yau, Y. K., Zheng, J., Liu, C., Zhang, M., Cheung, C. P., Ching, J. Y. L., Tun, H. M., Yu, J., Chan, F. K. L., & Ng, S. C. (2022). Faecal microbiome-based machine learning for multi-class disease diagnosis. Nature Communications, 13(1), 6818-6818. https://doi.org/10.1038/s41467-022-34405-3
