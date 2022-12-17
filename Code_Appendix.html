@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Yiyan Zhang" />
+
+<meta name="date" content="2022-12-17" />
+
+<title>Code_Appendix</title>
+
+<script src="site_libs/header-attrs-2.18/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Yiyan Zhang Final Project</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="tables.html">Tables</a>
+</li>
+<li>
+  <a href="figures.html">Figures</a>
+</li>
+<li>
+  <a href="index.html">Full Report</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Code_Appendix</h1>
+<h4 class="author">Yiyan Zhang</h4>
+<h4 class="date">2022-12-17</h4>
+
+</div>
+
+
+<div id="appendix-all-code-for-this-report" class="section level1">
+<h1>Appendix: All code for this report</h1>
+<pre class="r"><code>library(tidyverse)
+library(data.table)
+library(curatedMetagenomicData)
+library(phyloseq)
+library(mia)
+library(vegan)
+
+###Healthy
+sampleMetadata &lt;- curatedMetagenomicData::sampleMetadata %&gt;%
+  filter(age &gt;= 18 &amp;
+           age &lt;= 65 &amp;
+           body_site == &quot;stool&quot; &amp;
+           antibiotics_current_use == &#39;no&#39; &amp;
+           sequencing_platform == &#39;IlluminaHiSeq&#39; &amp;
+           study_condition == &#39;control&#39;)
+
+sampleMetadata &lt;- sampleMetadata %&gt;%
+  group_by(study_name, subject_id) %&gt;% 
+  ungroup()
+
+
+###Disease
+#unique(curatedMetagenomicData::sampleMetadata$study_condition)
+
+#CRC - 368
+#IBD - 768
+#IGT -199
+#T2D - 164
+
+Disease &lt;- c(&quot;CRC&quot;, &quot;IBD&quot;, &quot;IGT&quot;, &quot;T2D&quot;)
+sampleMetadata_disease &lt;- curatedMetagenomicData::sampleMetadata %&gt;%
+  filter(age &gt;= 18 &amp;
+           age &lt;= 65 &amp;
+           body_site == &quot;stool&quot; &amp;
+           #antibiotics_current_use == &#39;no&#39; &amp;
+           sequencing_platform == &#39;IlluminaHiSeq&#39; &amp;
+           study_condition %in% Disease)
+
+sampleMetadata_disease &lt;- sampleMetadata_disease %&gt;%
+  group_by(study_name, subject_id) %&gt;% 
+  ungroup()
+
+#================taxonomic profile==========================
+stool_profile &lt;- curatedMetagenomicData::returnSamples(rbind(sampleMetadata,sampleMetadata_disease), 
+                                                       dataType = &quot;relative_abundance&quot;)
+species_stool &lt;- splitByRanks(stool_profile, rank = &quot;species&quot;)[[1]]
+stool_phyloseq &lt;- makePhyloseqFromTreeSummarizedExperiment(species_stool, abund_values = &quot;relative_abundance&quot;)
+
+stool_profile_count &lt;- curatedMetagenomicData::returnSamples(rbind(sampleMetadata,sampleMetadata_disease), 
+                                                       dataType = &quot;relative_abundance&quot;,counts = &quot;TRUE&quot;)
+species_stool_count &lt;- splitByRanks(stool_profile_count, rank = &quot;species&quot;)[[1]]
+stool_phyloseq_count &lt;- makePhyloseqFromTreeSummarizedExperiment(species_stool_count, abund_values = &quot;relative_abundance&quot;)
+
+present_proportion &lt;- apply(stool_phyloseq@otu_table,1,function(i) length(which(i != 0))/length(i))
+
+OTU &lt;- as.data.frame(stool_phyloseq@otu_table) |&gt; t()
+
+OTU_H &lt;- as.data.frame(stool_phyloseq@otu_table) |&gt; select(sampleMetadata$sample_id) |&gt; 
+  t() |&gt; as.data.frame()
+
+OTU_IBD &lt;- as.data.frame(stool_phyloseq@otu_table) |&gt; 
+  select(sampleMetadata_disease[which(sampleMetadata_disease$study_condition == &quot;IBD&quot;),]$sample_id) |&gt; 
+  t() |&gt; as.data.frame()
+
+OTU_CRC &lt;- as.data.frame(stool_phyloseq@otu_table) |&gt; 
+  select(sampleMetadata_disease[which(sampleMetadata_disease$study_condition == &quot;CRC&quot;),]$sample_id) |&gt; 
+  t() |&gt; as.data.frame()
+
+OTU_IGT &lt;- as.data.frame(stool_phyloseq@otu_table) |&gt; 
+  select(sampleMetadata_disease[which(sampleMetadata_disease$study_condition == &quot;IGT&quot;),]$sample_id) |&gt; 
+  t() |&gt; as.data.frame()
+
+OTU_T2D &lt;- as.data.frame(stool_phyloseq@otu_table) |&gt; 
+  select(sampleMetadata_disease[which(sampleMetadata_disease$study_condition == &quot;T2D&quot;),]$sample_id) |&gt;
+  t() |&gt; as.data.frame() 
+
+
+OTU_IBD$class &lt;- &quot;IBD&quot;
+OTU_CRC$class &lt;- &quot;CRC&quot;
+OTU_IGT$class &lt;- &quot;IGT&quot;
+OTU_T2D$class &lt;- &quot;T2D&quot;
+OTU_H$class &lt;- &quot;H&quot;
+
+OTU_IBD_H &lt;- rbind(OTU_IBD,OTU_H)[,c(names(which(present_proportion &gt; 0.1)),&quot;class&quot;)]
+OTU_CRC_H &lt;- rbind(OTU_CRC,OTU_H)[,c(names(which(present_proportion &gt; 0.1)),&quot;class&quot;)]
+OTU_IGT_H &lt;- rbind(OTU_IGT,OTU_H)[,c(names(which(present_proportion &gt; 0.1)),&quot;class&quot;)]
+OTU_T2D_H &lt;- rbind(OTU_T2D,OTU_H)[,c(names(which(present_proportion &gt; 0.1)),&quot;class&quot;)]
+
+OTU_CRC_H$class = factor(OTU_CRC_H$class,levels = c(&quot;H&quot;,&quot;CRC&quot;))
+
+###################################################
+###EDA###
+###################################################
+
+library(table1)
+library(ggpubr)
+table1(~age+gender|study_condition,data = data.frame(stool_phyloseq@sam_data), overall = &quot;Overall&quot;)
+
+plot_richness(stool_phyloseq_count, x=&quot;study_condition&quot;,color =&quot;study_condition&quot;, measures=c(&quot;Observed&quot;,&quot;Chao1&quot;, &quot;Shannon&quot;,&quot;Simpson&quot;))+
+geom_violin(alpha=0.6)+ 
+  theme(legend.position=&quot;none&quot;, axis.text.x=element_text(angle=45,hjust=1,vjust=1,size=12))+
+  theme_bw()
+
+###################################################
+###PCA###
+###################################################
+
+library(ggfortify)
+
+pca_IBD &lt;- prcomp(OTU_IBD_H[,-ncol(OTU_IBD_H)])
+plot_pca_IBD &lt;- autoplot(pca_IBD,data = OTU_IBD_H, colour = &#39;class&#39;,alpha = 0.5)
+
+pca_CRC &lt;- prcomp(OTU_CRC_H[,-ncol(OTU_CRC_H)])
+plot_pca_CRC &lt;- autoplot(pca_CRC,data = OTU_CRC_H, colour = &#39;class&#39;,alpha = 0.5)
+
+pca_IGT &lt;- prcomp(OTU_IGT_H[,-ncol(OTU_IGT_H)])
+plot_pca_IGT &lt;- autoplot(pca_IGT,data = OTU_IGT_H, colour = &#39;class&#39;,alpha = 0.5)
+
+pca_T2D &lt;- prcomp(OTU_T2D_H[,-ncol(OTU_T2D_H)])
+plot_pca_T2D &lt;- autoplot(pca_T2D,data = OTU_T2D_H, colour = &#39;class&#39;,alpha = 0.5)
+
+ggarrange(plot_pca_IBD,plot_pca_CRC,plot_pca_IGT,plot_pca_T2D)
+
+
+###################################################
+###logistic LASSO###
+###################################################
+
+
+library(MASS)
+library(glmnet)
+library(data.table)
+library(tidyverse)
+library(PRROC)
+
+set.seed(1)
+
+library(caret)
+Folds &lt;- createFolds(1:nrow(OTU_IBD_H), k = 10)
+accuracy_logistic_lasso_IBD &lt;- c()
+F1_logistic_lasso_IBD &lt;- c()
+auprc_logistic_lasso_IBD &lt;- c()
+for (i in 1:10){
+  train &lt;- OTU_IBD_H[unlist(Folds[-i]),]
+  test &lt;- OTU_IBD_H[unlist(Folds[i]),]
+  grid = 10^seq(10, -2, length = 100)
+  
+  lasso.mod = glmnet(as.matrix(train[,-ncol(OTU_IBD_H)]), as.numeric(as.factor(train[,ncol(OTU_IBD_H)])), alpha = 1, lambda = grid)
+  
+  cv.out = cv.glmnet(as.matrix(train[,-ncol(OTU_IBD_H)]), as.numeric(as.factor(train[,ncol(OTU_IBD_H)])), alpha = 1)
+  coef.min = coef(cv.out, s = &quot;lambda.min&quot;)
+  
+  logmodel_IBD &lt;- glm(as.numeric(as.factor(class))-1 ~.,family = binomial(link = logit) ,data = as.data.frame(train[,-c(which(coef.min == 0)-1)]))
+  
+  probabilities = logmodel_IBD %&gt;% predict(as.data.frame(test[,-ncol(OTU_IBD_H)]), type = &quot;response&quot;)
+  y_pred = as.factor(ifelse(probabilities &lt; 0.5, &quot;H&quot;, &quot;IBD&quot;))
+  
+  eval_logistic_lasso &lt;- confusionMatrix(as.factor(y_pred), as.factor(test[,ncol(OTU_IBD_H)]), mode = &quot;everything&quot;, positive=&quot;IBD&quot;)
+  accuracy_logistic_lasso_IBD &lt;- c(accuracy_logistic_lasso_IBD,eval_logistic_lasso$overall[&quot;Accuracy&quot;])
+  F1_logistic_lasso_IBD &lt;- c(F1_logistic_lasso_IBD,eval_logistic_lasso$byClass[&quot;F1&quot;])
+  
+  prroc_logistic_lasso &lt;- pr.curve(scores.class0 = probabilities[which(test[,ncol(OTU_IBD_H)] == &quot;IBD&quot;)],
+                                   scores.class1 = probabilities[which(test[,ncol(OTU_IBD_H)] == &quot;H&quot;)],curve=T)
+  auprc_logistic_lasso_IBD &lt;- c(auprc_logistic_lasso_IBD,prroc_logistic_lasso$auc.integral)
+}
+
+mean(accuracy_logistic_lasso_IBD)
+mean(F1_logistic_lasso_IBD)
+mean(auprc_logistic_lasso_IBD)
+
+
+set.seed(1)
+
+library(caret)
+Folds &lt;- createFolds(1:nrow(OTU_CRC_H), k = 10)
+accuracy_logistic_lasso_CRC &lt;- c()
+F1_logistic_lasso_CRC &lt;- c()
+auprc_logistic_lasso_CRC &lt;- c()
+for (i in 1:10){
+  train &lt;- OTU_CRC_H[unlist(Folds[-i]),]
+  test &lt;- OTU_CRC_H[unlist(Folds[i]),]
+  grid = 10^seq(10, -2, length = 100)
+  
+  lasso.mod = glmnet(as.matrix(train[,-ncol(OTU_CRC_H)]), as.numeric(as.factor(train[,ncol(OTU_CRC_H)])), 
+                     alpha = 1, lambda = grid)
+  
+  cv.out = cv.glmnet(as.matrix(train[,-ncol(OTU_CRC_H)]), as.numeric(as.factor(train[,ncol(OTU_CRC_H)])), alpha = 1)
+  coef.min = coef(cv.out, s = &quot;lambda.min&quot;)
+  
+  logmodel_CRC &lt;- glm(as.numeric(as.factor(class))-1 ~.,family = binomial(link = logit) ,data = as.data.frame(train[,-c(which(coef.min == 0)-1)]))
+  
+  probabilities = logmodel_CRC %&gt;% predict(as.data.frame(test[,-ncol(OTU_CRC_H)]), type = &quot;response&quot;)
+  y_pred = as.factor(ifelse(probabilities &lt; 0.5, &quot;H&quot;, &quot;CRC&quot;))
+  
+  eval_logistic_lasso &lt;- confusionMatrix(as.factor(y_pred), as.factor(test[,ncol(OTU_CRC_H)]), mode = &quot;everything&quot;, positive=&quot;CRC&quot;)
+  accuracy_logistic_lasso_CRC &lt;- c(accuracy_logistic_lasso_CRC,eval_logistic_lasso$overall[&quot;Accuracy&quot;])
+  F1_logistic_lasso_CRC &lt;- c(F1_logistic_lasso_CRC,eval_logistic_lasso$byClass[&quot;F1&quot;])
+  
+  prroc_logistic_lasso &lt;- pr.curve(scores.class0 = probabilities[which(test[,ncol(OTU_CRC_H)] == &quot;CRC&quot;)],
+                                   scores.class1 = probabilities[which(test[,ncol(OTU_CRC_H)] == &quot;H&quot;)],curve=T)
+  auprc_logistic_lasso_CRC &lt;- c(auprc_logistic_lasso_CRC,prroc_logistic_lasso$auc.integral)
+}
+
+mean(accuracy_logistic_lasso_CRC)
+mean(F1_logistic_lasso_CRC)
+mean(auprc_logistic_lasso_CRC)
+
+
+
+set.seed(1)
+
+library(caret)
+Folds &lt;- createFolds(1:nrow(OTU_IGT_H), k = 10)
+accuracy_logistic_lasso_IGT &lt;- c()
+F1_logistic_lasso_IGT  &lt;- c()
+auprc_logistic_lasso_IGT  &lt;- c()
+for (i in 1:10){
+  train &lt;- OTU_IGT_H[unlist(Folds[-i]),]
+  test &lt;- OTU_IGT_H[unlist(Folds[i]),]
+  grid = 10^seq(10, -2, length = 100)
+  
+  lasso.mod = glmnet(as.matrix(train[,-ncol(OTU_IGT_H)]), as.numeric(as.factor(train[,ncol(OTU_IGT_H)])), 
+                     alpha = 1, lambda = grid)
+  
+  cv.out = cv.glmnet(as.matrix(train[,-ncol(OTU_IGT_H)]), as.numeric(as.factor(train[,ncol(OTU_IGT_H)])), alpha = 1)
+  coef.min = coef(cv.out, s = &quot;lambda.min&quot;)
+  
+  logmodel_IGT &lt;- glm(as.numeric(as.factor(class))-1 ~.,family = binomial(link = logit) ,data = as.data.frame(train[,-c(which(coef.min == 0)-1)]))
+  
+  probabilities = logmodel_IGT %&gt;% predict(as.data.frame(test[,-ncol(OTU_IGT_H)]), type = &quot;response&quot;)
+  y_pred = as.factor(ifelse(probabilities &lt; 0.5, &quot;H&quot;, &quot;IGT&quot;))
+  
+  eval_logistic_lasso &lt;- confusionMatrix(as.factor(y_pred), as.factor(test[,ncol(OTU_IGT_H)]), mode = &quot;everything&quot;, positive=&quot;IGT&quot;)
+  accuracy_logistic_lasso_IGT &lt;- c(accuracy_logistic_lasso_IGT,eval_logistic_lasso$overall[&quot;Accuracy&quot;])
+  F1_logistic_lasso_IGT &lt;- c(F1_logistic_lasso_IGT,eval_logistic_lasso$byClass[&quot;F1&quot;])
+  
+  prroc_logistic_lasso &lt;- pr.curve(scores.class0 = probabilities[which(test[,ncol(OTU_IGT_H)] == &quot;IGT&quot;)],
+                                   scores.class1 = probabilities[which(test[,ncol(OTU_IGT_H)] == &quot;H&quot;)],curve=T)
+  auprc_logistic_lasso_IGT &lt;- c(auprc_logistic_lasso_IGT,prroc_logistic_lasso$auc.integral)
+}
+
+mean(accuracy_logistic_lasso_IGT)
+mean(F1_logistic_lasso_IGT)
+mean(auprc_logistic_lasso_IGT)
+
+
+set.seed(11)
+
+library(caret)
+Folds &lt;- createFolds(1:nrow(OTU_T2D_H), k = 10)
+accuracy_logistic_lasso_T2D &lt;- c()
+F1_logistic_lasso_T2D  &lt;- c()
+auprc_logistic_lasso_T2D  &lt;- c()
+for (i in 1:10){
+  train &lt;- OTU_T2D_H[unlist(Folds[-i]),]
+  test &lt;- OTU_T2D_H[unlist(Folds[i]),]
+  grid = 10^seq(10, -2, length = 100)
+  
+  lasso.mod = glmnet(as.matrix(train[,-ncol(OTU_T2D_H)]), as.numeric(as.factor(train[,ncol(OTU_T2D_H)])), 
+                     alpha = 1, lambda = grid)
+  
+  cv.out = cv.glmnet(as.matrix(train[,-ncol(OTU_T2D_H)]), as.numeric(as.factor(train[,ncol(OTU_T2D_H)])), alpha = 1)
+  coef.min = coef(cv.out, s = &quot;lambda.min&quot;)
+  
+  logmodel_T2D &lt;- glm(as.numeric(as.factor(class))-1 ~.,family = binomial(link = logit) ,data = as.data.frame(train[,-c(which(coef.min == 0)-1)]))
+  
+  probabilities = logmodel_T2D %&gt;% predict(as.data.frame(test[,-ncol(OTU_T2D_H)]), type = &quot;response&quot;)
+  y_pred = as.factor(ifelse(probabilities &lt; 0.5, &quot;H&quot;, &quot;T2D&quot;))
+  
+  eval_logistic_lasso &lt;- confusionMatrix(as.factor(y_pred), as.factor(test[,ncol(OTU_T2D_H)]), mode = &quot;everything&quot;, positive=&quot;T2D&quot;)
+  accuracy_logistic_lasso_T2D &lt;- c(accuracy_logistic_lasso_T2D,eval_logistic_lasso$overall[&quot;Accuracy&quot;])
+  F1_logistic_lasso_T2D &lt;- c(F1_logistic_lasso_T2D,eval_logistic_lasso$byClass[&quot;F1&quot;])
+  
+  prroc_logistic_lasso &lt;- pr.curve(scores.class0 = probabilities[which(test[,ncol(OTU_T2D_H)] == &quot;T2D&quot;)],
+                                   scores.class1 = probabilities[which(test[,ncol(OTU_T2D_H)] == &quot;H&quot;)],curve=T)
+  auprc_logistic_lasso_T2D &lt;- c(auprc_logistic_lasso_IGT,prroc_logistic_lasso$auc.integral)
+}
+
+mean(accuracy_logistic_lasso_T2D)
+mean(F1_logistic_lasso_T2D)
+mean(auprc_logistic_lasso_T2D)
+
+###################################################
+###Random Forest###
+###################################################
+
+library(caTools)
+library(randomForest)
+library(PRROC)
+library(data.table)
+
+set.seed(111)
+library(caret)
+Folds &lt;- createFolds(1:nrow(OTU_IBD_H), k = 10)
+accuracy_RF_IBD &lt;- c()
+F1_RF_IBD &lt;- c()
+auprc_RF_IBD &lt;- c()
+for (i in 1:10){
+  train &lt;- OTU_IBD_H[unlist(Folds[-i]),]
+  test &lt;- OTU_IBD_H[unlist(Folds[i]),]
+  
+  control &lt;- trainControl(method=&quot;cv&quot;, number = 5)
+  grid_rf &lt;- data.frame(mtry = c(5, 10, 50, 100, 150))
+  
+  train_rf_IBD &lt;-  train(train[,-ncol(OTU_IBD_H)], train[,ncol(OTU_IBD_H)], 
+                   method = &quot;rf&quot;, 
+                   ntree = 200,
+                   trControl = control,
+                   tuneGrid = grid_rf,
+                   nSamp = 500)
+  
+  fit_rf_IBD &lt;- randomForest(train[,-ncol(OTU_IBD_H)], as.factor(train[,ncol(OTU_IBD_H)]),mtry = train_rf_IBD$bestTune$mtry)
+  
+  y_pred = predict(fit_rf_IBD, newdata = test[,-ncol(OTU_IBD_H)])
+  y_pred_prob = predict(fit_rf_IBD, newdata = test[-ncol(OTU_IBD_H)], type = &quot;prob&quot;)
+  
+  eval_RF &lt;- confusionMatrix(as.factor(as.numeric(y_pred)), as.factor(as.numeric(as.factor(test[,ncol(OTU_IBD_H)]))), 
+                             mode = &quot;everything&quot;, positive=&quot;2&quot;)
+  accuracy_RF_IBD &lt;- c(accuracy_RF_IBD,eval_RF$overall[&quot;Accuracy&quot;])
+  F1_RF_IBD &lt;- c(F1_RF_IBD,eval_RF$byClass[&quot;F1&quot;])
+
+  prroc_RF &lt;- pr.curve(scores.class0 = y_pred_prob[which(test[,ncol(OTU_IBD_H)] == &quot;IBD&quot;),&quot;IBD&quot;],
+                       scores.class1 = y_pred_prob[which(test[,ncol(OTU_IBD_H)] == &quot;H&quot;),&quot;IBD&quot;],curve=T)
+
+  auprc_RF_IBD &lt;- c(auprc_RF_IBD,prroc_RF$auc.integral)
+}
+
+mean(accuracy_RF_IBD)
+mean(F1_RF_IBD)
+mean(auprc_RF_IBD)
+
+set.seed(111)
+library(caret)
+Folds &lt;- createFolds(1:nrow(OTU_CRC_H), k = 10)
+accuracy_RF_CRC &lt;- c()
+F1_RF_CRC &lt;- c()
+auprc_RF_CRC &lt;- c()
+for (i in 1:10){
+  train &lt;- OTU_CRC_H[unlist(Folds[-i]),]
+  test &lt;- OTU_CRC_H[unlist(Folds[i]),]
+  
+  control &lt;- trainControl(method=&quot;cv&quot;, number = 10)
+  grid_rf &lt;- data.frame(mtry = c(5, 10, 50, 100, 150))
+  
+  train_rf_CRC &lt;-  train(train[,-ncol(OTU_CRC_H)], train[,ncol(OTU_CRC_H)], 
+                   method = &quot;rf&quot;, 
+                   ntree = 200,
+                   trControl = control,
+                   tuneGrid = grid_rf,
+                   nSamp = 500)
+  
+  fit_rf_CRC &lt;- randomForest(train[,-ncol(OTU_CRC_H)], as.factor(train[,ncol(OTU_CRC_H)]),mtry = train_rf_CRC$bestTune$mtry)
+  
+  y_pred = predict(fit_rf_CRC, newdata = test[,-ncol(OTU_CRC_H)])
+  y_pred_prob = predict(fit_rf_CRC, newdata = test[-ncol(OTU_CRC_H)], type = &quot;prob&quot;)
+  
+  eval_RF &lt;- confusionMatrix(as.factor(as.numeric(y_pred)), as.factor(as.numeric(as.factor(test[,ncol(OTU_CRC_H)]))), 
+                             mode = &quot;everything&quot;, positive=&quot;2&quot;)
+  accuracy_RF_CRC &lt;- c(accuracy_RF_CRC,eval_RF$overall[&quot;Accuracy&quot;])
+  F1_RF_CRC &lt;- c(F1_RF_CRC,eval_RF$byClass[&quot;F1&quot;])
+
+  prroc_RF &lt;- pr.curve(scores.class0 = y_pred_prob[which(test[,ncol(OTU_CRC_H)] == &quot;CRC&quot;),&quot;CRC&quot;],
+                       scores.class1 = y_pred_prob[which(test[,ncol(OTU_CRC_H)] == &quot;H&quot;),&quot;CRC&quot;],curve=T)
+
+  auprc_RF_CRC &lt;- c(auprc_RF_CRC,prroc_RF$auc.integral)
+}
+
+mean(accuracy_RF_CRC)
+mean(F1_RF_CRC)
+mean(auprc_RF_CRC)
+
+
+set.seed(111)
+library(caret)
+Folds &lt;- createFolds(1:nrow(OTU_IGT_H), k = 10)
+accuracy_RF_IGT &lt;- c()
+F1_RF_IGT &lt;- c()
+auprc_RF_IGT &lt;- c()
+for (i in 1:10){
+  train &lt;- OTU_IGT_H[unlist(Folds[-i]),]
+  test &lt;- OTU_IGT_H[unlist(Folds[i]),]
+  
+  control &lt;- trainControl(method=&quot;cv&quot;, number = 10)
+  grid_rf &lt;- data.frame(mtry = c(5, 10, 50, 100, 150))
+  
+  train_rf_IGT &lt;-  train(train[,-ncol(OTU_IGT_H)], train[,ncol(OTU_IGT_H)], 
+                   method = &quot;rf&quot;, 
+                   ntree = 200,
+                   trControl = control,
+                   tuneGrid = grid_rf,
+                   nSamp = 500)
+  
+  fit_rf_IGT &lt;- randomForest(train[,-ncol(OTU_IGT_H)], as.factor(train[,ncol(OTU_IGT_H)]),mtry = train_rf_IGT$bestTune$mtry)
+  
+  y_pred = predict(fit_rf_IGT, newdata = test[,-ncol(OTU_IGT_H)])
+  y_pred_prob = predict(fit_rf_IGT, newdata = test[-ncol(OTU_IGT_H)], type = &quot;prob&quot;)
+  
+  eval_RF &lt;- confusionMatrix(as.factor(as.numeric(y_pred)), as.factor(as.numeric(as.factor(test[,ncol(OTU_IGT_H)]))), 
+                             mode = &quot;everything&quot;, positive=&quot;2&quot;)
+  accuracy_RF_IGT &lt;- c(accuracy_RF_IGT,eval_RF$overall[&quot;Accuracy&quot;])
+  F1_RF_IGT &lt;- c(F1_RF_IGT,eval_RF$byClass[&quot;F1&quot;])
+
+  prroc_RF &lt;- pr.curve(scores.class0 = y_pred_prob[which(test[,ncol(OTU_IGT_H)] == &quot;IGT&quot;),&quot;IGT&quot;],
+                       scores.class1 = y_pred_prob[which(test[,ncol(OTU_IGT_H)] == &quot;H&quot;),&quot;IGT&quot;],curve=T)
+
+  auprc_RF_IGT &lt;- c(auprc_RF_IGT,prroc_RF$auc.integral)
+}
+
+mean(accuracy_RF_IGT)
+mean(F1_RF_IGT)
+mean(auprc_RF_IGT)
+
+
+
+set.seed(111)
+library(caret)
+Folds &lt;- createFolds(1:nrow(OTU_T2D_H), k = 10)
+accuracy_RF_T2D &lt;- c()
+F1_RF_T2D &lt;- c()
+auprc_RF_T2D &lt;- c()
+for (i in 1:10){
+  train &lt;- OTU_T2D_H[unlist(Folds[-i]),]
+  test &lt;- OTU_T2D_H[unlist(Folds[i]),]
+  
+  control &lt;- trainControl(method=&quot;cv&quot;, number = 10)
+  grid_rf &lt;- data.frame(mtry = c(5, 10, 50, 100, 150))
+  
+  train_rf_T2D &lt;-  train(train[,-ncol(OTU_T2D_H)], as.factor(train[,ncol(OTU_T2D_H)]), 
+                   method = &quot;rf&quot;, 
+                   ntree = 200,
+                   trControl = control,
+                   tuneGrid = grid_rf,
+                   nSamp = 500)
+  
+  fit_rf_T2D &lt;- randomForest(train[,-ncol(OTU_T2D_H)], as.factor(train[,ncol(OTU_T2D_H)]),mtry = train_rf_T2D$bestTune$mtry)
+  
+  y_pred = predict(fit_rf_T2D, newdata = test[,-ncol(OTU_T2D_H)])
+  y_pred_prob = predict(fit_rf_T2D, newdata = test[-ncol(OTU_T2D_H)], type = &quot;prob&quot;)
+  
+  eval_RF &lt;- confusionMatrix(as.factor(as.numeric(y_pred)), as.factor(as.numeric(as.factor(test[,ncol(OTU_T2D_H)]))), 
+                             mode = &quot;everything&quot;, positive=&quot;2&quot;)
+  accuracy_RF_T2D &lt;- c(accuracy_RF_T2D,eval_RF$overall[&quot;Accuracy&quot;])
+  F1_RF_T2D &lt;- c(F1_RF_T2D,eval_RF$byClass[&quot;F1&quot;])
+
+  prroc_RF &lt;- pr.curve(scores.class0 = y_pred_prob[which(test[,ncol(OTU_T2D_H)] == &quot;T2D&quot;),&quot;T2D&quot;],
+                       scores.class1 = y_pred_prob[which(test[,ncol(OTU_T2D_H)] == &quot;H&quot;),&quot;T2D&quot;],curve=T)
+
+  auprc_RF_T2D &lt;- c(auprc_RF_T2D,prroc_RF$auc.integral)
+}
+
+mean(accuracy_RF_T2D)
+mean(F1_RF_T2D)
+mean(auprc_RF_T2D)
+
+### save for running time
+
+#save model
+saveRDS(fit_rf_IBD,&quot;RF_IBD.rds&quot;)
+saveRDS(fit_rf_CRC,&quot;RF_CRC.rds&quot;)
+saveRDS(fit_rf_IGT,&quot;RF_IGT.rds&quot;)
+saveRDS(fit_rf_T2D,&quot;RF_T2D.rds&quot;)
+
+#save performance
+performance_rf &lt;- cbind(accuracy_RF_IBD,F1_RF_IBD,auprc_RF_IBD,
+                        accuracy_RF_CRC,F1_RF_CRC,auprc_RF_CRC,
+                        accuracy_RF_IGT,F1_RF_IGT,auprc_RF_IGT,
+                        accuracy_RF_T2D,F1_RF_T2D,auprc_RF_T2D)
+fwrite(performance_rf,&quot;performance_rf.txt&quot;)
+
+
+readRDS(&quot;RF_IBD.rds&quot;)
+readRDS(&quot;RF_CRC.rds&quot;)
+readRDS(&quot;RF_IGT.rds&quot;)
+readRDS(&quot;RF_T2D.rds&quot;)
+
+performance_rf &lt;- fread(&quot;performance_rf.txt&quot;)
+
+logistic_list &lt;- list(names(logmodel_IBD$coefficients[-1]),names(logmodel_CRC$coefficients[-1]),
+                      names(logmodel_IGT$coefficients[-1]),names(logmodel_T2D$coefficients[-1]))
+
+
+library(VennDiagram)
+library(grid)
+library(RColorBrewer)
+myCol &lt;- brewer.pal(4, &quot;Pastel2&quot;)
+
+# Chart
+
+display_venn &lt;- function(x, ...){
+  library(VennDiagram)
+  grid.newpage()
+  venn_object &lt;- venn.diagram(x, category.names = c(&quot;IBD&quot;, &quot;CRC &quot;,&quot;IGT&quot;,&quot;T2D&quot;),
+        fill = myCol,
+        filename = NULL, ...)
+  grid.draw(venn_object)
+}
+display_venn(logistic_list)
+
+vip_IBD &lt;- varImpPlot(fit_rf_IBD,n.var = 10)
+vip_CRC &lt;-varImpPlot(fit_rf_CRC,n.var = 10)
+vip_IGT &lt;-varImpPlot(fit_rf_IGT,n.var = 10)
+vip_T2D &lt;- varImpPlot(fit_rf_T2D,n.var = 10)
+
+
+performance_logit &lt;- cbind(accuracy_logistic_lasso_IBD,F1_logistic_lasso_IBD,auprc_logistic_lasso_IBD,
+                           accuracy_logistic_lasso_CRC,F1_logistic_lasso_CRC,auprc_logistic_lasso_CRC,
+                           accuracy_logistic_lasso_IGT,F1_logistic_lasso_IGT,auprc_logistic_lasso_IGT,
+                           accuracy_logistic_lasso_T2D,F1_logistic_lasso_T2D,auprc_logistic_lasso_T2D)
+perofrmance &lt;- cbind(performance_rf,performance_logit)
+
+perofrmance |&gt; melt() |&gt; mutate(method = as.factor(case_when(str_detect(variable,&quot;logistic&quot;) ~ &quot;Logit-Lasso&quot;,
+                                                             str_detect(variable,&quot;RF&quot;) ~ &quot;RF&quot;))) |&gt;
+  mutate(disease = case_when(str_detect(variable,&quot;CRC&quot;) ~ &quot;CRC&quot;,str_detect(variable,&quot;IBD&quot;) ~ &quot;IBD&quot;,
+                            str_detect(variable,&quot;IGT&quot;) ~ &quot;IGT&quot;,str_detect(variable,&quot;T2D&quot;) ~ &quot;T2D&quot;)) |&gt;
+  mutate(eval = case_when(str_detect(variable,&quot;accuracy&quot;) ~ &quot;Accuracy&quot;,str_detect(variable,&quot;F1&quot;) ~ &quot;F1&quot;,
+                          str_detect(variable,&quot;auprc&quot;) ~ &quot;AUPRC&quot;)) |&gt; 
+  mutate(disease_method = paste(disease,method)) |&gt;
+  filter(eval == &quot;Accuracy&quot;) |&gt;
+  ggplot(aes(x=value, y=disease_method,fill=disease_method)) +
+  geom_rect(aes(ymin=0.5,ymax=2.5,xmin=-Inf,xmax=Inf,fill = &quot;zXGB&quot;),alpha = 0.9,show.legend = FALSE) +
+  geom_rect(aes(ymin=4.5,ymax=6.5,xmin=-Inf,xmax=Inf,fill = &quot;zXGB&quot;),alpha = 0.9,show.legend = FALSE) +
+  geom_boxplot(outlier.colour=&quot;grey75&quot;, outlier.size=1,show.legend = FALSE) +
+  scale_fill_manual(values=c(&quot;#f768a1&quot;,&quot;#fde0dd&quot;,&quot;#f16913&quot;,&quot;#fdd0a2&quot;,&quot;#3680c0&quot;, &quot;#deebf7&quot;,&quot;#41ae76&quot;,&quot;#c7e9b4&quot;,&quot;gray90&quot;))+
+  theme_classic()+
+  theme(strip.background = element_rect(fill = &quot;ivory&quot;))+
+  scale_y_discrete(limits = rev)+
+  labs(y = &quot;&quot;)+
+  facet_wrap(. ~ eval,nrow = 1) 
+
+perofrmance |&gt; melt() |&gt; mutate(method = as.factor(case_when(str_detect(variable,&quot;logistic&quot;) ~ &quot;Logit-Lasso&quot;,
+                                                             str_detect(variable,&quot;RF&quot;) ~ &quot;RF&quot;))) |&gt;
+  mutate(disease = case_when(str_detect(variable,&quot;CRC&quot;) ~ &quot;CRC&quot;,str_detect(variable,&quot;IBD&quot;) ~ &quot;IBD&quot;,
+                            str_detect(variable,&quot;IGT&quot;) ~ &quot;IGT&quot;,str_detect(variable,&quot;T2D&quot;) ~ &quot;T2D&quot;)) |&gt;
+  mutate(eval = case_when(str_detect(variable,&quot;accuracy&quot;) ~ &quot;Accuracy&quot;,str_detect(variable,&quot;F1&quot;) ~ &quot;F1&quot;,
+                          str_detect(variable,&quot;auprc&quot;) ~ &quot;AUPRC&quot;)) |&gt; 
+  mutate(disease_method = paste(disease,method)) |&gt;
+  filter(eval == &quot;F1&quot;) |&gt;
+  ggplot(aes(x=value, y=disease_method,fill=disease_method)) +
+  geom_rect(aes(ymin=0.5,ymax=2.5,xmin=-Inf,xmax=Inf,fill = &quot;zXGB&quot;),alpha = 0.9,show.legend = FALSE) +
+  geom_rect(aes(ymin=4.5,ymax=6.5,xmin=-Inf,xmax=Inf,fill = &quot;zXGB&quot;),alpha = 0.9,show.legend = FALSE) +
+  geom_boxplot(outlier.colour=&quot;grey75&quot;, outlier.size=1,show.legend = FALSE) +
+  scale_fill_manual(values=c(&quot;#f768a1&quot;,&quot;#fde0dd&quot;,&quot;#f16913&quot;,&quot;#fdd0a2&quot;,&quot;#3680c0&quot;, &quot;#deebf7&quot;,&quot;#41ae76&quot;,&quot;#c7e9b4&quot;,&quot;gray90&quot;))+
+  theme_classic()+
+  theme(strip.background = element_rect(fill = &quot;ivory&quot;))+
+  scale_y_discrete(limits = rev)+
+  labs(y = &quot;&quot;)+
+  facet_wrap(. ~ eval,nrow = 1) 
+
+perofrmance |&gt; melt() |&gt; mutate(method = as.factor(case_when(str_detect(variable,&quot;logistic&quot;) ~ &quot;Logit-Lasso&quot;,
+                                                             str_detect(variable,&quot;RF&quot;) ~ &quot;RF&quot;))) |&gt;
+  mutate(disease = case_when(str_detect(variable,&quot;CRC&quot;) ~ &quot;CRC&quot;,str_detect(variable,&quot;IBD&quot;) ~ &quot;IBD&quot;,
+                            str_detect(variable,&quot;IGT&quot;) ~ &quot;IGT&quot;,str_detect(variable,&quot;T2D&quot;) ~ &quot;T2D&quot;)) |&gt;
+  mutate(eval = case_when(str_detect(variable,&quot;accuracy&quot;) ~ &quot;Accuracy&quot;,str_detect(variable,&quot;F1&quot;) ~ &quot;F1&quot;,
+                          str_detect(variable,&quot;auprc&quot;) ~ &quot;AUPRC&quot;)) |&gt; 
+  mutate(disease_method = paste(disease,method)) |&gt;
+  filter(eval == &quot;AUPRC&quot;) |&gt;
+  ggplot(aes(x=value, y=disease_method,fill=disease_method)) +
+  geom_rect(aes(ymin=0.5,ymax=2.5,xmin=-Inf,xmax=Inf,fill = &quot;zXGB&quot;),alpha = 0.9,show.legend = FALSE) +
+  geom_rect(aes(ymin=4.5,ymax=6.5,xmin=-Inf,xmax=Inf,fill = &quot;zXGB&quot;),alpha = 0.9,show.legend = FALSE) +
+  geom_boxplot(outlier.colour=&quot;grey75&quot;, outlier.size=1,show.legend = FALSE) +
+  scale_fill_manual(values=c(&quot;#f768a1&quot;,&quot;#fde0dd&quot;,&quot;#f16913&quot;,&quot;#fdd0a2&quot;,&quot;#3680c0&quot;, &quot;#deebf7&quot;,&quot;#41ae76&quot;,&quot;#c7e9b4&quot;,&quot;gray90&quot;))+
+  theme_classic()+
+  theme(strip.background = element_rect(fill = &quot;ivory&quot;))+
+  scale_y_discrete(limits = rev)+
+  labs(y = &quot;&quot;)+
+  facet_wrap(. ~ eval,nrow = 1) </code></pre>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

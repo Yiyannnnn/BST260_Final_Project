@@ -1,0 +1,16 @@
+name: "my-website"
+output_dir: "."
+navbar:
+  title: "Yiyan Zhang Final Project"
+  left:
+    - text: "Table & Figures"
+      href: tables.html
+    - text: "Code"
+      href: figures.html
+    - text: "Report"
+      href: index.html
+      
+output:
+  html_document:
+    theme: cosmo
+    highlight: textmate

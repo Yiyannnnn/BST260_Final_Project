@@ -1,0 +1,579 @@
+---
+title: "Code_Appendix"
+author: "Yiyan Zhang"
+date: "2022-12-17"
+output: html_document
+---
+
+# Appendix: All code for this report
+
+```{r ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE}
+library(tidyverse)
+library(data.table)
+library(curatedMetagenomicData)
+library(phyloseq)
+library(mia)
+library(vegan)
+
+###Healthy
+sampleMetadata <- curatedMetagenomicData::sampleMetadata %>%
+  filter(age >= 18 &
+           age <= 65 &
+           body_site == "stool" &
+           antibiotics_current_use == 'no' &
+           sequencing_platform == 'IlluminaHiSeq' &
+           study_condition == 'control')
+
+sampleMetadata <- sampleMetadata %>%
+  group_by(study_name, subject_id) %>% 
+  ungroup()
+
+
+###Disease
+#unique(curatedMetagenomicData::sampleMetadata$study_condition)
+
+#CRC - 368
+#IBD - 768
+#IGT -199
+#T2D - 164
+
+Disease <- c("CRC", "IBD", "IGT", "T2D")
+sampleMetadata_disease <- curatedMetagenomicData::sampleMetadata %>%
+  filter(age >= 18 &
+           age <= 65 &
+           body_site == "stool" &
+           #antibiotics_current_use == 'no' &
+           sequencing_platform == 'IlluminaHiSeq' &
+           study_condition %in% Disease)
+
+sampleMetadata_disease <- sampleMetadata_disease %>%
+  group_by(study_name, subject_id) %>% 
+  ungroup()
+
+#================taxonomic profile==========================
+stool_profile <- curatedMetagenomicData::returnSamples(rbind(sampleMetadata,sampleMetadata_disease), 
+                                                       dataType = "relative_abundance")
+species_stool <- splitByRanks(stool_profile, rank = "species")[[1]]
+stool_phyloseq <- makePhyloseqFromTreeSummarizedExperiment(species_stool, abund_values = "relative_abundance")
+
+stool_profile_count <- curatedMetagenomicData::returnSamples(rbind(sampleMetadata,sampleMetadata_disease), 
+                                                       dataType = "relative_abundance",counts = "TRUE")
+species_stool_count <- splitByRanks(stool_profile_count, rank = "species")[[1]]
+stool_phyloseq_count <- makePhyloseqFromTreeSummarizedExperiment(species_stool_count, abund_values = "relative_abundance")
+
+present_proportion <- apply(stool_phyloseq@otu_table,1,function(i) length(which(i != 0))/length(i))
+
+OTU <- as.data.frame(stool_phyloseq@otu_table) |> t()
+
+OTU_H <- as.data.frame(stool_phyloseq@otu_table) |> select(sampleMetadata$sample_id) |> 
+  t() |> as.data.frame()
+
+OTU_IBD <- as.data.frame(stool_phyloseq@otu_table) |> 
+  select(sampleMetadata_disease[which(sampleMetadata_disease$study_condition == "IBD"),]$sample_id) |> 
+  t() |> as.data.frame()
+
+OTU_CRC <- as.data.frame(stool_phyloseq@otu_table) |> 
+  select(sampleMetadata_disease[which(sampleMetadata_disease$study_condition == "CRC"),]$sample_id) |> 
+  t() |> as.data.frame()
+
+OTU_IGT <- as.data.frame(stool_phyloseq@otu_table) |> 
+  select(sampleMetadata_disease[which(sampleMetadata_disease$study_condition == "IGT"),]$sample_id) |> 
+  t() |> as.data.frame()
+
+OTU_T2D <- as.data.frame(stool_phyloseq@otu_table) |> 
+  select(sampleMetadata_disease[which(sampleMetadata_disease$study_condition == "T2D"),]$sample_id) |>
+  t() |> as.data.frame() 
+
+
+OTU_IBD$class <- "IBD"
+OTU_CRC$class <- "CRC"
+OTU_IGT$class <- "IGT"
+OTU_T2D$class <- "T2D"
+OTU_H$class <- "H"
+
+OTU_IBD_H <- rbind(OTU_IBD,OTU_H)[,c(names(which(present_proportion > 0.1)),"class")]
+OTU_CRC_H <- rbind(OTU_CRC,OTU_H)[,c(names(which(present_proportion > 0.1)),"class")]
+OTU_IGT_H <- rbind(OTU_IGT,OTU_H)[,c(names(which(present_proportion > 0.1)),"class")]
+OTU_T2D_H <- rbind(OTU_T2D,OTU_H)[,c(names(which(present_proportion > 0.1)),"class")]
+
+OTU_CRC_H$class = factor(OTU_CRC_H$class,levels = c("H","CRC"))
+
+###################################################
+###EDA###
+###################################################
+
+library(table1)
+library(ggpubr)
+table1(~age+gender|study_condition,data = data.frame(stool_phyloseq@sam_data), overall = "Overall")
+
+plot_richness(stool_phyloseq_count, x="study_condition",color ="study_condition", measures=c("Observed","Chao1", "Shannon","Simpson"))+
+geom_violin(alpha=0.6)+ 
+  theme(legend.position="none", axis.text.x=element_text(angle=45,hjust=1,vjust=1,size=12))+
+  theme_bw()
+
+###################################################
+###PCA###
+###################################################
+
+library(ggfortify)
+
+pca_IBD <- prcomp(OTU_IBD_H[,-ncol(OTU_IBD_H)])
+plot_pca_IBD <- autoplot(pca_IBD,data = OTU_IBD_H, colour = 'class',alpha = 0.5)
+
+pca_CRC <- prcomp(OTU_CRC_H[,-ncol(OTU_CRC_H)])
+plot_pca_CRC <- autoplot(pca_CRC,data = OTU_CRC_H, colour = 'class',alpha = 0.5)
+
+pca_IGT <- prcomp(OTU_IGT_H[,-ncol(OTU_IGT_H)])
+plot_pca_IGT <- autoplot(pca_IGT,data = OTU_IGT_H, colour = 'class',alpha = 0.5)
+
+pca_T2D <- prcomp(OTU_T2D_H[,-ncol(OTU_T2D_H)])
+plot_pca_T2D <- autoplot(pca_T2D,data = OTU_T2D_H, colour = 'class',alpha = 0.5)
+
+ggarrange(plot_pca_IBD,plot_pca_CRC,plot_pca_IGT,plot_pca_T2D)
+
+
+###################################################
+###logistic LASSO###
+###################################################
+
+
+library(MASS)
+library(glmnet)
+library(data.table)
+library(tidyverse)
+library(PRROC)
+
+set.seed(1)
+
+library(caret)
+Folds <- createFolds(1:nrow(OTU_IBD_H), k = 10)
+accuracy_logistic_lasso_IBD <- c()
+F1_logistic_lasso_IBD <- c()
+auprc_logistic_lasso_IBD <- c()
+for (i in 1:10){
+  train <- OTU_IBD_H[unlist(Folds[-i]),]
+  test <- OTU_IBD_H[unlist(Folds[i]),]
+  grid = 10^seq(10, -2, length = 100)
+  
+  lasso.mod = glmnet(as.matrix(train[,-ncol(OTU_IBD_H)]), as.numeric(as.factor(train[,ncol(OTU_IBD_H)])), alpha = 1, lambda = grid)
+  
+  cv.out = cv.glmnet(as.matrix(train[,-ncol(OTU_IBD_H)]), as.numeric(as.factor(train[,ncol(OTU_IBD_H)])), alpha = 1)
+  coef.min = coef(cv.out, s = "lambda.min")
+  
+  logmodel_IBD <- glm(as.numeric(as.factor(class))-1 ~.,family = binomial(link = logit) ,data = as.data.frame(train[,-c(which(coef.min == 0)-1)]))
+  
+  probabilities = logmodel_IBD %>% predict(as.data.frame(test[,-ncol(OTU_IBD_H)]), type = "response")
+  y_pred = as.factor(ifelse(probabilities < 0.5, "H", "IBD"))
+  
+  eval_logistic_lasso <- confusionMatrix(as.factor(y_pred), as.factor(test[,ncol(OTU_IBD_H)]), mode = "everything", positive="IBD")
+  accuracy_logistic_lasso_IBD <- c(accuracy_logistic_lasso_IBD,eval_logistic_lasso$overall["Accuracy"])
+  F1_logistic_lasso_IBD <- c(F1_logistic_lasso_IBD,eval_logistic_lasso$byClass["F1"])
+  
+  prroc_logistic_lasso <- pr.curve(scores.class0 = probabilities[which(test[,ncol(OTU_IBD_H)] == "IBD")],
+                                   scores.class1 = probabilities[which(test[,ncol(OTU_IBD_H)] == "H")],curve=T)
+  auprc_logistic_lasso_IBD <- c(auprc_logistic_lasso_IBD,prroc_logistic_lasso$auc.integral)
+}
+
+mean(accuracy_logistic_lasso_IBD)
+mean(F1_logistic_lasso_IBD)
+mean(auprc_logistic_lasso_IBD)
+
+
+set.seed(1)
+
+library(caret)
+Folds <- createFolds(1:nrow(OTU_CRC_H), k = 10)
+accuracy_logistic_lasso_CRC <- c()
+F1_logistic_lasso_CRC <- c()
+auprc_logistic_lasso_CRC <- c()
+for (i in 1:10){
+  train <- OTU_CRC_H[unlist(Folds[-i]),]
+  test <- OTU_CRC_H[unlist(Folds[i]),]
+  grid = 10^seq(10, -2, length = 100)
+  
+  lasso.mod = glmnet(as.matrix(train[,-ncol(OTU_CRC_H)]), as.numeric(as.factor(train[,ncol(OTU_CRC_H)])), 
+                     alpha = 1, lambda = grid)
+  
+  cv.out = cv.glmnet(as.matrix(train[,-ncol(OTU_CRC_H)]), as.numeric(as.factor(train[,ncol(OTU_CRC_H)])), alpha = 1)
+  coef.min = coef(cv.out, s = "lambda.min")
+  
+  logmodel_CRC <- glm(as.numeric(as.factor(class))-1 ~.,family = binomial(link = logit) ,data = as.data.frame(train[,-c(which(coef.min == 0)-1)]))
+  
+  probabilities = logmodel_CRC %>% predict(as.data.frame(test[,-ncol(OTU_CRC_H)]), type = "response")
+  y_pred = as.factor(ifelse(probabilities < 0.5, "H", "CRC"))
+  
+  eval_logistic_lasso <- confusionMatrix(as.factor(y_pred), as.factor(test[,ncol(OTU_CRC_H)]), mode = "everything", positive="CRC")
+  accuracy_logistic_lasso_CRC <- c(accuracy_logistic_lasso_CRC,eval_logistic_lasso$overall["Accuracy"])
+  F1_logistic_lasso_CRC <- c(F1_logistic_lasso_CRC,eval_logistic_lasso$byClass["F1"])
+  
+  prroc_logistic_lasso <- pr.curve(scores.class0 = probabilities[which(test[,ncol(OTU_CRC_H)] == "CRC")],
+                                   scores.class1 = probabilities[which(test[,ncol(OTU_CRC_H)] == "H")],curve=T)
+  auprc_logistic_lasso_CRC <- c(auprc_logistic_lasso_CRC,prroc_logistic_lasso$auc.integral)
+}
+
+mean(accuracy_logistic_lasso_CRC)
+mean(F1_logistic_lasso_CRC)
+mean(auprc_logistic_lasso_CRC)
+
+
+
+set.seed(1)
+
+library(caret)
+Folds <- createFolds(1:nrow(OTU_IGT_H), k = 10)
+accuracy_logistic_lasso_IGT <- c()
+F1_logistic_lasso_IGT  <- c()
+auprc_logistic_lasso_IGT  <- c()
+for (i in 1:10){
+  train <- OTU_IGT_H[unlist(Folds[-i]),]
+  test <- OTU_IGT_H[unlist(Folds[i]),]
+  grid = 10^seq(10, -2, length = 100)
+  
+  lasso.mod = glmnet(as.matrix(train[,-ncol(OTU_IGT_H)]), as.numeric(as.factor(train[,ncol(OTU_IGT_H)])), 
+                     alpha = 1, lambda = grid)
+  
+  cv.out = cv.glmnet(as.matrix(train[,-ncol(OTU_IGT_H)]), as.numeric(as.factor(train[,ncol(OTU_IGT_H)])), alpha = 1)
+  coef.min = coef(cv.out, s = "lambda.min")
+  
+  logmodel_IGT <- glm(as.numeric(as.factor(class))-1 ~.,family = binomial(link = logit) ,data = as.data.frame(train[,-c(which(coef.min == 0)-1)]))
+  
+  probabilities = logmodel_IGT %>% predict(as.data.frame(test[,-ncol(OTU_IGT_H)]), type = "response")
+  y_pred = as.factor(ifelse(probabilities < 0.5, "H", "IGT"))
+  
+  eval_logistic_lasso <- confusionMatrix(as.factor(y_pred), as.factor(test[,ncol(OTU_IGT_H)]), mode = "everything", positive="IGT")
+  accuracy_logistic_lasso_IGT <- c(accuracy_logistic_lasso_IGT,eval_logistic_lasso$overall["Accuracy"])
+  F1_logistic_lasso_IGT <- c(F1_logistic_lasso_IGT,eval_logistic_lasso$byClass["F1"])
+  
+  prroc_logistic_lasso <- pr.curve(scores.class0 = probabilities[which(test[,ncol(OTU_IGT_H)] == "IGT")],
+                                   scores.class1 = probabilities[which(test[,ncol(OTU_IGT_H)] == "H")],curve=T)
+  auprc_logistic_lasso_IGT <- c(auprc_logistic_lasso_IGT,prroc_logistic_lasso$auc.integral)
+}
+
+mean(accuracy_logistic_lasso_IGT)
+mean(F1_logistic_lasso_IGT)
+mean(auprc_logistic_lasso_IGT)
+
+
+set.seed(11)
+
+library(caret)
+Folds <- createFolds(1:nrow(OTU_T2D_H), k = 10)
+accuracy_logistic_lasso_T2D <- c()
+F1_logistic_lasso_T2D  <- c()
+auprc_logistic_lasso_T2D  <- c()
+for (i in 1:10){
+  train <- OTU_T2D_H[unlist(Folds[-i]),]
+  test <- OTU_T2D_H[unlist(Folds[i]),]
+  grid = 10^seq(10, -2, length = 100)
+  
+  lasso.mod = glmnet(as.matrix(train[,-ncol(OTU_T2D_H)]), as.numeric(as.factor(train[,ncol(OTU_T2D_H)])), 
+                     alpha = 1, lambda = grid)
+  
+  cv.out = cv.glmnet(as.matrix(train[,-ncol(OTU_T2D_H)]), as.numeric(as.factor(train[,ncol(OTU_T2D_H)])), alpha = 1)
+  coef.min = coef(cv.out, s = "lambda.min")
+  
+  logmodel_T2D <- glm(as.numeric(as.factor(class))-1 ~.,family = binomial(link = logit) ,data = as.data.frame(train[,-c(which(coef.min == 0)-1)]))
+  
+  probabilities = logmodel_T2D %>% predict(as.data.frame(test[,-ncol(OTU_T2D_H)]), type = "response")
+  y_pred = as.factor(ifelse(probabilities < 0.5, "H", "T2D"))
+  
+  eval_logistic_lasso <- confusionMatrix(as.factor(y_pred), as.factor(test[,ncol(OTU_T2D_H)]), mode = "everything", positive="T2D")
+  accuracy_logistic_lasso_T2D <- c(accuracy_logistic_lasso_T2D,eval_logistic_lasso$overall["Accuracy"])
+  F1_logistic_lasso_T2D <- c(F1_logistic_lasso_T2D,eval_logistic_lasso$byClass["F1"])
+  
+  prroc_logistic_lasso <- pr.curve(scores.class0 = probabilities[which(test[,ncol(OTU_T2D_H)] == "T2D")],
+                                   scores.class1 = probabilities[which(test[,ncol(OTU_T2D_H)] == "H")],curve=T)
+  auprc_logistic_lasso_T2D <- c(auprc_logistic_lasso_IGT,prroc_logistic_lasso$auc.integral)
+}
+
+mean(accuracy_logistic_lasso_T2D)
+mean(F1_logistic_lasso_T2D)
+mean(auprc_logistic_lasso_T2D)
+
+###################################################
+###Random Forest###
+###################################################
+
+library(caTools)
+library(randomForest)
+library(PRROC)
+library(data.table)
+
+set.seed(111)
+library(caret)
+Folds <- createFolds(1:nrow(OTU_IBD_H), k = 10)
+accuracy_RF_IBD <- c()
+F1_RF_IBD <- c()
+auprc_RF_IBD <- c()
+for (i in 1:10){
+  train <- OTU_IBD_H[unlist(Folds[-i]),]
+  test <- OTU_IBD_H[unlist(Folds[i]),]
+  
+  control <- trainControl(method="cv", number = 5)
+  grid_rf <- data.frame(mtry = c(5, 10, 50, 100, 150))
+  
+  train_rf_IBD <-  train(train[,-ncol(OTU_IBD_H)], train[,ncol(OTU_IBD_H)], 
+                   method = "rf", 
+                   ntree = 200,
+                   trControl = control,
+                   tuneGrid = grid_rf,
+                   nSamp = 500)
+  
+  fit_rf_IBD <- randomForest(train[,-ncol(OTU_IBD_H)], as.factor(train[,ncol(OTU_IBD_H)]),mtry = train_rf_IBD$bestTune$mtry)
+  
+  y_pred = predict(fit_rf_IBD, newdata = test[,-ncol(OTU_IBD_H)])
+  y_pred_prob = predict(fit_rf_IBD, newdata = test[-ncol(OTU_IBD_H)], type = "prob")
+  
+  eval_RF <- confusionMatrix(as.factor(as.numeric(y_pred)), as.factor(as.numeric(as.factor(test[,ncol(OTU_IBD_H)]))), 
+                             mode = "everything", positive="2")
+  accuracy_RF_IBD <- c(accuracy_RF_IBD,eval_RF$overall["Accuracy"])
+  F1_RF_IBD <- c(F1_RF_IBD,eval_RF$byClass["F1"])
+
+  prroc_RF <- pr.curve(scores.class0 = y_pred_prob[which(test[,ncol(OTU_IBD_H)] == "IBD"),"IBD"],
+                       scores.class1 = y_pred_prob[which(test[,ncol(OTU_IBD_H)] == "H"),"IBD"],curve=T)
+
+  auprc_RF_IBD <- c(auprc_RF_IBD,prroc_RF$auc.integral)
+}
+
+mean(accuracy_RF_IBD)
+mean(F1_RF_IBD)
+mean(auprc_RF_IBD)
+
+set.seed(111)
+library(caret)
+Folds <- createFolds(1:nrow(OTU_CRC_H), k = 10)
+accuracy_RF_CRC <- c()
+F1_RF_CRC <- c()
+auprc_RF_CRC <- c()
+for (i in 1:10){
+  train <- OTU_CRC_H[unlist(Folds[-i]),]
+  test <- OTU_CRC_H[unlist(Folds[i]),]
+  
+  control <- trainControl(method="cv", number = 10)
+  grid_rf <- data.frame(mtry = c(5, 10, 50, 100, 150))
+  
+  train_rf_CRC <-  train(train[,-ncol(OTU_CRC_H)], train[,ncol(OTU_CRC_H)], 
+                   method = "rf", 
+                   ntree = 200,
+                   trControl = control,
+                   tuneGrid = grid_rf,
+                   nSamp = 500)
+  
+  fit_rf_CRC <- randomForest(train[,-ncol(OTU_CRC_H)], as.factor(train[,ncol(OTU_CRC_H)]),mtry = train_rf_CRC$bestTune$mtry)
+  
+  y_pred = predict(fit_rf_CRC, newdata = test[,-ncol(OTU_CRC_H)])
+  y_pred_prob = predict(fit_rf_CRC, newdata = test[-ncol(OTU_CRC_H)], type = "prob")
+  
+  eval_RF <- confusionMatrix(as.factor(as.numeric(y_pred)), as.factor(as.numeric(as.factor(test[,ncol(OTU_CRC_H)]))), 
+                             mode = "everything", positive="2")
+  accuracy_RF_CRC <- c(accuracy_RF_CRC,eval_RF$overall["Accuracy"])
+  F1_RF_CRC <- c(F1_RF_CRC,eval_RF$byClass["F1"])
+
+  prroc_RF <- pr.curve(scores.class0 = y_pred_prob[which(test[,ncol(OTU_CRC_H)] == "CRC"),"CRC"],
+                       scores.class1 = y_pred_prob[which(test[,ncol(OTU_CRC_H)] == "H"),"CRC"],curve=T)
+
+  auprc_RF_CRC <- c(auprc_RF_CRC,prroc_RF$auc.integral)
+}
+
+mean(accuracy_RF_CRC)
+mean(F1_RF_CRC)
+mean(auprc_RF_CRC)
+
+
+set.seed(111)
+library(caret)
+Folds <- createFolds(1:nrow(OTU_IGT_H), k = 10)
+accuracy_RF_IGT <- c()
+F1_RF_IGT <- c()
+auprc_RF_IGT <- c()
+for (i in 1:10){
+  train <- OTU_IGT_H[unlist(Folds[-i]),]
+  test <- OTU_IGT_H[unlist(Folds[i]),]
+  
+  control <- trainControl(method="cv", number = 10)
+  grid_rf <- data.frame(mtry = c(5, 10, 50, 100, 150))
+  
+  train_rf_IGT <-  train(train[,-ncol(OTU_IGT_H)], train[,ncol(OTU_IGT_H)], 
+                   method = "rf", 
+                   ntree = 200,
+                   trControl = control,
+                   tuneGrid = grid_rf,
+                   nSamp = 500)
+  
+  fit_rf_IGT <- randomForest(train[,-ncol(OTU_IGT_H)], as.factor(train[,ncol(OTU_IGT_H)]),mtry = train_rf_IGT$bestTune$mtry)
+  
+  y_pred = predict(fit_rf_IGT, newdata = test[,-ncol(OTU_IGT_H)])
+  y_pred_prob = predict(fit_rf_IGT, newdata = test[-ncol(OTU_IGT_H)], type = "prob")
+  
+  eval_RF <- confusionMatrix(as.factor(as.numeric(y_pred)), as.factor(as.numeric(as.factor(test[,ncol(OTU_IGT_H)]))), 
+                             mode = "everything", positive="2")
+  accuracy_RF_IGT <- c(accuracy_RF_IGT,eval_RF$overall["Accuracy"])
+  F1_RF_IGT <- c(F1_RF_IGT,eval_RF$byClass["F1"])
+
+  prroc_RF <- pr.curve(scores.class0 = y_pred_prob[which(test[,ncol(OTU_IGT_H)] == "IGT"),"IGT"],
+                       scores.class1 = y_pred_prob[which(test[,ncol(OTU_IGT_H)] == "H"),"IGT"],curve=T)
+
+  auprc_RF_IGT <- c(auprc_RF_IGT,prroc_RF$auc.integral)
+}
+
+mean(accuracy_RF_IGT)
+mean(F1_RF_IGT)
+mean(auprc_RF_IGT)
+
+
+
+set.seed(111)
+library(caret)
+Folds <- createFolds(1:nrow(OTU_T2D_H), k = 10)
+accuracy_RF_T2D <- c()
+F1_RF_T2D <- c()
+auprc_RF_T2D <- c()
+for (i in 1:10){
+  train <- OTU_T2D_H[unlist(Folds[-i]),]
+  test <- OTU_T2D_H[unlist(Folds[i]),]
+  
+  control <- trainControl(method="cv", number = 10)
+  grid_rf <- data.frame(mtry = c(5, 10, 50, 100, 150))
+  
+  train_rf_T2D <-  train(train[,-ncol(OTU_T2D_H)], as.factor(train[,ncol(OTU_T2D_H)]), 
+                   method = "rf", 
+                   ntree = 200,
+                   trControl = control,
+                   tuneGrid = grid_rf,
+                   nSamp = 500)
+  
+  fit_rf_T2D <- randomForest(train[,-ncol(OTU_T2D_H)], as.factor(train[,ncol(OTU_T2D_H)]),mtry = train_rf_T2D$bestTune$mtry)
+  
+  y_pred = predict(fit_rf_T2D, newdata = test[,-ncol(OTU_T2D_H)])
+  y_pred_prob = predict(fit_rf_T2D, newdata = test[-ncol(OTU_T2D_H)], type = "prob")
+  
+  eval_RF <- confusionMatrix(as.factor(as.numeric(y_pred)), as.factor(as.numeric(as.factor(test[,ncol(OTU_T2D_H)]))), 
+                             mode = "everything", positive="2")
+  accuracy_RF_T2D <- c(accuracy_RF_T2D,eval_RF$overall["Accuracy"])
+  F1_RF_T2D <- c(F1_RF_T2D,eval_RF$byClass["F1"])
+
+  prroc_RF <- pr.curve(scores.class0 = y_pred_prob[which(test[,ncol(OTU_T2D_H)] == "T2D"),"T2D"],
+                       scores.class1 = y_pred_prob[which(test[,ncol(OTU_T2D_H)] == "H"),"T2D"],curve=T)
+
+  auprc_RF_T2D <- c(auprc_RF_T2D,prroc_RF$auc.integral)
+}
+
+mean(accuracy_RF_T2D)
+mean(F1_RF_T2D)
+mean(auprc_RF_T2D)
+
+### save for running time
+
+#save model
+saveRDS(fit_rf_IBD,"RF_IBD.rds")
+saveRDS(fit_rf_CRC,"RF_CRC.rds")
+saveRDS(fit_rf_IGT,"RF_IGT.rds")
+saveRDS(fit_rf_T2D,"RF_T2D.rds")
+
+#save performance
+performance_rf <- cbind(accuracy_RF_IBD,F1_RF_IBD,auprc_RF_IBD,
+                        accuracy_RF_CRC,F1_RF_CRC,auprc_RF_CRC,
+                        accuracy_RF_IGT,F1_RF_IGT,auprc_RF_IGT,
+                        accuracy_RF_T2D,F1_RF_T2D,auprc_RF_T2D)
+fwrite(performance_rf,"performance_rf.txt")
+
+
+readRDS("RF_IBD.rds")
+readRDS("RF_CRC.rds")
+readRDS("RF_IGT.rds")
+readRDS("RF_T2D.rds")
+
+performance_rf <- fread("performance_rf.txt")
+
+logistic_list <- list(names(logmodel_IBD$coefficients[-1]),names(logmodel_CRC$coefficients[-1]),
+                      names(logmodel_IGT$coefficients[-1]),names(logmodel_T2D$coefficients[-1]))
+
+
+library(VennDiagram)
+library(grid)
+library(RColorBrewer)
+myCol <- brewer.pal(4, "Pastel2")
+
+# Chart
+
+display_venn <- function(x, ...){
+  library(VennDiagram)
+  grid.newpage()
+  venn_object <- venn.diagram(x, category.names = c("IBD", "CRC ","IGT","T2D"),
+        fill = myCol,
+        filename = NULL, ...)
+  grid.draw(venn_object)
+}
+display_venn(logistic_list)
+
+vip_IBD <- varImpPlot(fit_rf_IBD,n.var = 10)
+vip_CRC <-varImpPlot(fit_rf_CRC,n.var = 10)
+vip_IGT <-varImpPlot(fit_rf_IGT,n.var = 10)
+vip_T2D <- varImpPlot(fit_rf_T2D,n.var = 10)
+
+
+performance_logit <- cbind(accuracy_logistic_lasso_IBD,F1_logistic_lasso_IBD,auprc_logistic_lasso_IBD,
+                           accuracy_logistic_lasso_CRC,F1_logistic_lasso_CRC,auprc_logistic_lasso_CRC,
+                           accuracy_logistic_lasso_IGT,F1_logistic_lasso_IGT,auprc_logistic_lasso_IGT,
+                           accuracy_logistic_lasso_T2D,F1_logistic_lasso_T2D,auprc_logistic_lasso_T2D)
+perofrmance <- cbind(performance_rf,performance_logit)
+
+perofrmance |> melt() |> mutate(method = as.factor(case_when(str_detect(variable,"logistic") ~ "Logit-Lasso",
+                                                             str_detect(variable,"RF") ~ "RF"))) |>
+  mutate(disease = case_when(str_detect(variable,"CRC") ~ "CRC",str_detect(variable,"IBD") ~ "IBD",
+                            str_detect(variable,"IGT") ~ "IGT",str_detect(variable,"T2D") ~ "T2D")) |>
+  mutate(eval = case_when(str_detect(variable,"accuracy") ~ "Accuracy",str_detect(variable,"F1") ~ "F1",
+                          str_detect(variable,"auprc") ~ "AUPRC")) |> 
+  mutate(disease_method = paste(disease,method)) |>
+  filter(eval == "Accuracy") |>
+  ggplot(aes(x=value, y=disease_method,fill=disease_method)) +
+  geom_rect(aes(ymin=0.5,ymax=2.5,xmin=-Inf,xmax=Inf,fill = "zXGB"),alpha = 0.9,show.legend = FALSE) +
+  geom_rect(aes(ymin=4.5,ymax=6.5,xmin=-Inf,xmax=Inf,fill = "zXGB"),alpha = 0.9,show.legend = FALSE) +
+  geom_boxplot(outlier.colour="grey75", outlier.size=1,show.legend = FALSE) +
+  scale_fill_manual(values=c("#f768a1","#fde0dd","#f16913","#fdd0a2","#3680c0", "#deebf7","#41ae76","#c7e9b4","gray90"))+
+  theme_classic()+
+  theme(strip.background = element_rect(fill = "ivory"))+
+  scale_y_discrete(limits = rev)+
+  labs(y = "")+
+  facet_wrap(. ~ eval,nrow = 1) 
+
+perofrmance |> melt() |> mutate(method = as.factor(case_when(str_detect(variable,"logistic") ~ "Logit-Lasso",
+                                                             str_detect(variable,"RF") ~ "RF"))) |>
+  mutate(disease = case_when(str_detect(variable,"CRC") ~ "CRC",str_detect(variable,"IBD") ~ "IBD",
+                            str_detect(variable,"IGT") ~ "IGT",str_detect(variable,"T2D") ~ "T2D")) |>
+  mutate(eval = case_when(str_detect(variable,"accuracy") ~ "Accuracy",str_detect(variable,"F1") ~ "F1",
+                          str_detect(variable,"auprc") ~ "AUPRC")) |> 
+  mutate(disease_method = paste(disease,method)) |>
+  filter(eval == "F1") |>
+  ggplot(aes(x=value, y=disease_method,fill=disease_method)) +
+  geom_rect(aes(ymin=0.5,ymax=2.5,xmin=-Inf,xmax=Inf,fill = "zXGB"),alpha = 0.9,show.legend = FALSE) +
+  geom_rect(aes(ymin=4.5,ymax=6.5,xmin=-Inf,xmax=Inf,fill = "zXGB"),alpha = 0.9,show.legend = FALSE) +
+  geom_boxplot(outlier.colour="grey75", outlier.size=1,show.legend = FALSE) +
+  scale_fill_manual(values=c("#f768a1","#fde0dd","#f16913","#fdd0a2","#3680c0", "#deebf7","#41ae76","#c7e9b4","gray90"))+
+  theme_classic()+
+  theme(strip.background = element_rect(fill = "ivory"))+
+  scale_y_discrete(limits = rev)+
+  labs(y = "")+
+  facet_wrap(. ~ eval,nrow = 1) 
+
+perofrmance |> melt() |> mutate(method = as.factor(case_when(str_detect(variable,"logistic") ~ "Logit-Lasso",
+                                                             str_detect(variable,"RF") ~ "RF"))) |>
+  mutate(disease = case_when(str_detect(variable,"CRC") ~ "CRC",str_detect(variable,"IBD") ~ "IBD",
+                            str_detect(variable,"IGT") ~ "IGT",str_detect(variable,"T2D") ~ "T2D")) |>
+  mutate(eval = case_when(str_detect(variable,"accuracy") ~ "Accuracy",str_detect(variable,"F1") ~ "F1",
+                          str_detect(variable,"auprc") ~ "AUPRC")) |> 
+  mutate(disease_method = paste(disease,method)) |>
+  filter(eval == "AUPRC") |>
+  ggplot(aes(x=value, y=disease_method,fill=disease_method)) +
+  geom_rect(aes(ymin=0.5,ymax=2.5,xmin=-Inf,xmax=Inf,fill = "zXGB"),alpha = 0.9,show.legend = FALSE) +
+  geom_rect(aes(ymin=4.5,ymax=6.5,xmin=-Inf,xmax=Inf,fill = "zXGB"),alpha = 0.9,show.legend = FALSE) +
+  geom_boxplot(outlier.colour="grey75", outlier.size=1,show.legend = FALSE) +
+  scale_fill_manual(values=c("#f768a1","#fde0dd","#f16913","#fdd0a2","#3680c0", "#deebf7","#41ae76","#c7e9b4","gray90"))+
+  theme_classic()+
+  theme(strip.background = element_rect(fill = "ivory"))+
+  scale_y_discrete(limits = rev)+
+  labs(y = "")+
+  facet_wrap(. ~ eval,nrow = 1) 
+  
+```
+
