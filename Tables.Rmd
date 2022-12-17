@@ -1,19 +1,32 @@
 ---
-title: "Code_Appendix"
+title: "Tables & Figures"
 author: "Yiyan Zhang"
 output: html_document
 ---
 
-# Appendix: All code for this report
+```{r,warning=FALSE,echo=FALSE,message=FALSE}
 
 
-```{r ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE}
+library(table1)
+library(ggpubr)
 library(tidyverse)
 library(data.table)
 library(curatedMetagenomicData)
 library(phyloseq)
 library(mia)
 library(vegan)
+
+
+library(MASS)
+library(glmnet)
+library(data.table)
+library(tidyverse)
+library(PRROC)
+
+library(caTools)
+library(randomForest)
+library(PRROC)
+library(data.table)
 
 ###Healthy
 sampleMetadata <- curatedMetagenomicData::sampleMetadata %>%
@@ -63,28 +76,45 @@ stool_phyloseq_count <- makePhyloseqFromTreeSummarizedExperiment(species_stool_c
 
 present_proportion <- apply(stool_phyloseq@otu_table,1,function(i) length(which(i != 0))/length(i))
 
-OTU <- as.data.frame(stool_phyloseq@otu_table) |> t()
+OTU <- as.data.frame(stool_phyloseq@otu_table)
 
-OTU_H <- as.data.frame(stool_phyloseq@otu_table) |> select(sampleMetadata$sample_id) |> 
+OTU_H <- OTU |> dplyr::select(sampleMetadata$sample_id) |> 
   t() |> as.data.frame()
 
-OTU_IBD <- as.data.frame(stool_phyloseq@otu_table) |> 
-  select(sampleMetadata_disease[which(sampleMetadata_disease$study_condition == "IBD"),]$sample_id) |> 
+OTU_IBD <- OTU |>
+  dplyr::select(sampleMetadata_disease[which(sampleMetadata_disease$study_condition == "IBD"),]$sample_id) |>
+    t() |> as.data.frame()
+
+OTU_CRC <- OTU |>
+  dplyr::select(sampleMetadata_disease[which(sampleMetadata_disease$study_condition == "CRC"),]$sample_id) |> 
   t() |> as.data.frame()
 
-OTU_CRC <- as.data.frame(stool_phyloseq@otu_table) |> 
-  select(sampleMetadata_disease[which(sampleMetadata_disease$study_condition == "CRC"),]$sample_id) |> 
+OTU_IGT <- OTU |>
+  dplyr::select(sampleMetadata_disease[which(sampleMetadata_disease$study_condition == "IGT"),]$sample_id) |> 
   t() |> as.data.frame()
 
-OTU_IGT <- as.data.frame(stool_phyloseq@otu_table) |> 
-  select(sampleMetadata_disease[which(sampleMetadata_disease$study_condition == "IGT"),]$sample_id) |> 
-  t() |> as.data.frame()
-
-OTU_T2D <- as.data.frame(stool_phyloseq@otu_table) |> 
-  select(sampleMetadata_disease[which(sampleMetadata_disease$study_condition == "T2D"),]$sample_id) |>
+OTU_T2D <- OTU |>
+  dplyr::select(sampleMetadata_disease[which(sampleMetadata_disease$study_condition == "T2D"),]$sample_id) |>
   t() |> as.data.frame() 
+```
 
 
+### Table 1. EDA summary table for age and gender information for all study samples
+
+```{r,warning=FALSE,echo=FALSE}
+table1(~age+gender|study_condition,data = data.frame(stool_phyloseq@sam_data), overall = "Overall")
+```
+
+```{r,warning=FALSE,echo=FALSE}
+plot_richness(stool_phyloseq_count, x="study_condition",color ="study_condition", measures=c("Observed","Chao1", "Shannon","Simpson"))+
+geom_violin(alpha=0.6)+ 
+  theme(legend.position="none", axis.text.x=element_text(angle=45,hjust=1,vjust=1,size=12))+
+  theme_bw()
+```
+
+### Figure 1. Alpha diversity for each health status
+
+```{r,echo=FALSE,message=FALSE}
 OTU_IBD$class <- "IBD"
 OTU_CRC$class <- "CRC"
 OTU_IGT$class <- "IGT"
@@ -97,24 +127,10 @@ OTU_IGT_H <- rbind(OTU_IGT,OTU_H)[,c(names(which(present_proportion > 0.1)),"cla
 OTU_T2D_H <- rbind(OTU_T2D,OTU_H)[,c(names(which(present_proportion > 0.1)),"class")]
 
 OTU_CRC_H$class = factor(OTU_CRC_H$class,levels = c("H","CRC"))
+```
 
-###################################################
-###EDA###
-###################################################
 
-library(table1)
-library(ggpubr)
-table1(~age+gender|study_condition,data = data.frame(stool_phyloseq@sam_data), overall = "Overall")
-
-plot_richness(stool_phyloseq_count, x="study_condition",color ="study_condition", measures=c("Observed","Chao1", "Shannon","Simpson"))+
-geom_violin(alpha=0.6)+ 
-  theme(legend.position="none", axis.text.x=element_text(angle=45,hjust=1,vjust=1,size=12))+
-  theme_bw()
-
-###################################################
-###PCA###
-###################################################
-
+```{r,echo=FALSE,message=FALSE}
 library(ggfortify)
 
 pca_IBD <- prcomp(OTU_IBD_H[,-ncol(OTU_IBD_H)])
@@ -131,17 +147,11 @@ plot_pca_T2D <- autoplot(pca_T2D,data = OTU_T2D_H, colour = 'class',alpha = 0.5)
 
 ggarrange(plot_pca_IBD,plot_pca_CRC,plot_pca_IGT,plot_pca_T2D)
 
+```
 
-###################################################
-###logistic LASSO###
-###################################################
+### Figure 2. PCA plot for Healthy vs IBD, Healthy vs CRC, Healthy vs IGT, and Healthy vs T2D
 
-
-library(MASS)
-library(glmnet)
-library(data.table)
-library(tidyverse)
-library(PRROC)
+```{r,warning=FALSE,echo=FALSE,message=FALSE,include=FALSE}
 
 set.seed(1)
 
@@ -177,6 +187,10 @@ for (i in 1:10){
 mean(accuracy_logistic_lasso_IBD)
 mean(F1_logistic_lasso_IBD)
 mean(auprc_logistic_lasso_IBD)
+
+```
+
+```{r,warning=FALSE,echo=FALSE,message=FALSE,include=FALSE}
 
 
 set.seed(1)
@@ -215,6 +229,10 @@ mean(accuracy_logistic_lasso_CRC)
 mean(F1_logistic_lasso_CRC)
 mean(auprc_logistic_lasso_CRC)
 
+```
+
+
+```{r,warning=FALSE,echo=FALSE,message=FALSE,include=FALSE}
 
 
 set.seed(1)
@@ -253,7 +271,10 @@ mean(accuracy_logistic_lasso_IGT)
 mean(F1_logistic_lasso_IGT)
 mean(auprc_logistic_lasso_IGT)
 
+```
 
+
+```{r,warning=FALSE,echo=FALSE,message=FALSE,include=FALSE}
 set.seed(11)
 
 library(caret)
@@ -289,11 +310,10 @@ for (i in 1:10){
 mean(accuracy_logistic_lasso_T2D)
 mean(F1_logistic_lasso_T2D)
 mean(auprc_logistic_lasso_T2D)
+```
 
-###################################################
-###Random Forest###
-###################################################
 
+```{r,eval=FALSE,include=FALSE,message=FALSE,echo=FALSE}
 library(caTools)
 library(randomForest)
 library(PRROC)
@@ -338,7 +358,10 @@ for (i in 1:10){
 mean(accuracy_RF_IBD)
 mean(F1_RF_IBD)
 mean(auprc_RF_IBD)
+```
 
+
+```{r,eval=FALSE,include=FALSE,message=FALSE,echo=FALSE}
 set.seed(111)
 library(caret)
 Folds <- createFolds(1:nrow(OTU_CRC_H), k = 10)
@@ -378,8 +401,10 @@ for (i in 1:10){
 mean(accuracy_RF_CRC)
 mean(F1_RF_CRC)
 mean(auprc_RF_CRC)
+```
 
 
+```{r,eval=FALSE,include=FALSE,message=FALSE,echo=FALSE}
 set.seed(111)
 library(caret)
 Folds <- createFolds(1:nrow(OTU_IGT_H), k = 10)
@@ -419,9 +444,9 @@ for (i in 1:10){
 mean(accuracy_RF_IGT)
 mean(F1_RF_IGT)
 mean(auprc_RF_IGT)
+```
 
-
-
+```{r,eval=FALSE,include=FALSE,message=FALSE,echo=FALSE}
 set.seed(111)
 library(caret)
 Folds <- createFolds(1:nrow(OTU_T2D_H), k = 10)
@@ -461,9 +486,9 @@ for (i in 1:10){
 mean(accuracy_RF_T2D)
 mean(F1_RF_T2D)
 mean(auprc_RF_T2D)
+```
 
-### save for running time
-
+```{r,eval=FALSE,include=FALSE,message=FALSE,echo=FALSE}
 #save model
 saveRDS(fit_rf_IBD,"RF_IBD.rds")
 saveRDS(fit_rf_CRC,"RF_CRC.rds")
@@ -476,18 +501,21 @@ performance_rf <- cbind(accuracy_RF_IBD,F1_RF_IBD,auprc_RF_IBD,
                         accuracy_RF_IGT,F1_RF_IGT,auprc_RF_IGT,
                         accuracy_RF_T2D,F1_RF_T2D,auprc_RF_T2D)
 fwrite(performance_rf,"performance_rf.txt")
+```
 
-
-readRDS("RF_IBD.rds")
-readRDS("RF_CRC.rds")
-readRDS("RF_IGT.rds")
-readRDS("RF_T2D.rds")
+```{r,echo=FALSE,message=FALSE}
+fit_rf_IBD <- readRDS("RF_IBD.rds")
+fit_rf_CRC <- readRDS("RF_CRC.rds")
+fit_rf_IGT <- readRDS("RF_IGT.rds")
+fit_rf_T2D <- readRDS("RF_T2D.rds")
 
 performance_rf <- fread("performance_rf.txt")
+```
 
+
+```{r,echo=FALSE,message=FALSE}
 logistic_list <- list(names(logmodel_IBD$coefficients[-1]),names(logmodel_CRC$coefficients[-1]),
                       names(logmodel_IGT$coefficients[-1]),names(logmodel_T2D$coefficients[-1]))
-
 
 library(VennDiagram)
 library(grid)
@@ -506,12 +534,22 @@ display_venn <- function(x, ...){
 }
 display_venn(logistic_list)
 
+```
+
+
+### Figure 3. Venn diagram for the selected predictors of each disease classification
+
+```{r,echo=FALSE,warning=FALSE,message=FALSE}
 vip_IBD <- varImpPlot(fit_rf_IBD,n.var = 10)
 vip_CRC <-varImpPlot(fit_rf_CRC,n.var = 10)
 vip_IGT <-varImpPlot(fit_rf_IGT,n.var = 10)
 vip_T2D <- varImpPlot(fit_rf_T2D,n.var = 10)
 
+```
 
+### Figure 4. Variable Importance Plot for Random Forest model of each disease classification
+
+```{r,warning=FALSE,echo=FALSE,message=FALSE}
 performance_logit <- cbind(accuracy_logistic_lasso_IBD,F1_logistic_lasso_IBD,auprc_logistic_lasso_IBD,
                            accuracy_logistic_lasso_CRC,F1_logistic_lasso_CRC,auprc_logistic_lasso_CRC,
                            accuracy_logistic_lasso_IGT,F1_logistic_lasso_IGT,auprc_logistic_lasso_IGT,
@@ -537,6 +575,11 @@ perofrmance |> melt() |> mutate(method = as.factor(case_when(str_detect(variable
   labs(y = "")+
   facet_wrap(. ~ eval,nrow = 1) 
 
+```
+
+### Figure 5. Performance evalutation of models by Accuracy
+
+```{r,warning=FALSE,echo=FALSE,message=FALSE}
 perofrmance |> melt() |> mutate(method = as.factor(case_when(str_detect(variable,"logistic") ~ "Logit-Lasso",
                                                              str_detect(variable,"RF") ~ "RF"))) |>
   mutate(disease = case_when(str_detect(variable,"CRC") ~ "CRC",str_detect(variable,"IBD") ~ "IBD",
@@ -556,6 +599,11 @@ perofrmance |> melt() |> mutate(method = as.factor(case_when(str_detect(variable
   labs(y = "")+
   facet_wrap(. ~ eval,nrow = 1) 
 
+```
+
+### Figure 6. Performance evalutation of models by F1 Score
+
+```{r,warning=FALSE,echo=FALSE,message=FALSE}
 perofrmance |> melt() |> mutate(method = as.factor(case_when(str_detect(variable,"logistic") ~ "Logit-Lasso",
                                                              str_detect(variable,"RF") ~ "RF"))) |>
   mutate(disease = case_when(str_detect(variable,"CRC") ~ "CRC",str_detect(variable,"IBD") ~ "IBD",
@@ -577,3 +625,4 @@ perofrmance |> melt() |> mutate(method = as.factor(case_when(str_detect(variable
   
 ```
 
+### Figure 7. Performance evalutation of models by AUPRC

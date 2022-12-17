@@ -3,8 +3,8 @@ output_dir: "."
 navbar:
   title: "Yiyan Zhang Final Project"
   left:
-    - text: "Table & Figures"
-      href: tables.html
+    - text: "Tables & Figures"
+      href: Tables.html
     - text: "Code"
       href: Code_Appendix.html
     - text: "Report"
