@@ -6,11 +6,11 @@ navbar:
     - text: "Table & Figures"
       href: tables.html
     - text: "Code"
-      href: figures.html
+      href: Code_Appendix.html
     - text: "Report"
-      href: index.html
+      href: main.html
       
 output:
   html_document:
-    theme: cosmo
+    theme: darkly
     highlight: textmate
